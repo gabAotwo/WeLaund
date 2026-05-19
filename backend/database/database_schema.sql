@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS owners (
     address         TEXT,
     email           VARCHAR(180)  NOT NULL UNIQUE,
     password_hash   VARCHAR(255)  NOT NULL,
+    profile_photo   VARCHAR(255)  DEFAULT NULL,
     created_on      TIMESTAMP     NOT NULL DEFAULT NOW(),
     created_by      UUID          REFERENCES super_admins(id),
     last_updated    TIMESTAMP     NOT NULL DEFAULT NOW(),

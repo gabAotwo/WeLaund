@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../controllers/AuthController.php';
 require_once __DIR__ . '/../../controllers/OwnerController.php';
 AuthController::requireRole('owner');
 
-$owner = new OwnerController($_SESSION['shop_id']);
+$owner = new OwnerController((string)($_SESSION['shop_id'] ?? ''));
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo json_encode(['success' => true, 'data' => $owner->getProfile($_SESSION['user_id'])]); exit;

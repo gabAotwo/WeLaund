@@ -182,10 +182,22 @@ class OwnerController
 
     public function getProfile(string $ownerId): ?array
     {
-        $stmt = $this->db->prepare(
-            'SELECT id, first_name, last_name, email, profile_photo FROM owners WHERE id = :id'
-        );
-        $stmt->execute([':id' => $ownerId]);
+        try {
+            $stmt = $this->db->prepare(
+                'SELECT id, first_name, last_name, email, profile_photo FROM owners WHERE id = :id'
+            );
+            $stmt->execute([':id' => $ownerId]);
+        } catch (\PDOException $e) {
+            if ($e->getCode() !== '42703') {
+                throw $e;
+            }
+
+            $stmt = $this->db->prepare(
+                'SELECT id, first_name, last_name, email, NULL AS profile_photo FROM owners WHERE id = :id'
+            );
+            $stmt->execute([':id' => $ownerId]);
+        }
+
         $row = $stmt->fetch();
         if ($row && $row['profile_photo']) {
             $row['photo_url'] = '/api/avatar.php?file=' . urlencode($row['profile_photo']);
