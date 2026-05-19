@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS laundry_shops (
     operating_hours VARCHAR(100),
     gcash_name      VARCHAR(120),
     gcash_number    VARCHAR(20),
+    delivery_available BOOLEAN      NOT NULL DEFAULT TRUE,
+    delivery_fee    NUMERIC(10,2)  NOT NULL DEFAULT 0,
     features        JSONB         DEFAULT '{}',
     created_on      TIMESTAMP     NOT NULL DEFAULT NOW(),
     created_by      UUID          REFERENCES super_admins(id),
@@ -126,6 +128,11 @@ CREATE TABLE IF NOT EXISTS orders (
     payment_status       VARCHAR(20)   NOT NULL DEFAULT 'Unpaid' CHECK (payment_status IN ('Unpaid','Paid')),
     order_status         VARCHAR(20)   NOT NULL DEFAULT 'Requested' CHECK (order_status IN ('Requested','Ongoing','Done','Cancelled')),
     pickup_delivery_type VARCHAR(50),
+    payment_method       VARCHAR(50),
+    notes                TEXT,
+    delivery_address     TEXT,
+    delivery_fee         NUMERIC(10,2) NOT NULL DEFAULT 0,
+    total_amount_estimated NUMERIC(10,2) NOT NULL DEFAULT 0,
     created_on           TIMESTAMP     NOT NULL DEFAULT NOW(),
     last_updated         TIMESTAMP     NOT NULL DEFAULT NOW()
 );

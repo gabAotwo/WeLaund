@@ -49,14 +49,35 @@ class CustomerController
     /** Get the shop this customer belongs to */
     public function getShop(): ?array
     {
-        $stmt = $this->db->prepare(
-            "SELECT s.shop_name, s.address, s.contact_number, s.gcash_name, s.gcash_number
-             FROM laundry_shops s
-             JOIN customers c ON c.shop_id = s.id
-             WHERE c.id = :cid LIMIT 1"
-        );
-        $stmt->execute([':cid' => $this->customerId]);
-        return $stmt->fetch() ?: null;
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT s.shop_name, s.address, s.contact_number, s.gcash_name, s.gcash_number,
+                        s.delivery_available, s.delivery_fee
+                 FROM laundry_shops s
+                 JOIN customers c ON c.shop_id = s.id
+                 WHERE c.id = :cid LIMIT 1"
+            );
+            $stmt->execute([':cid' => $this->customerId]);
+            return $stmt->fetch() ?: null;
+        } catch (\PDOException $e) {
+            if ($e->getCode() !== '42703') {
+                throw $e;
+            }
+
+            $stmt = $this->db->prepare(
+                "SELECT s.shop_name, s.address, s.contact_number, s.gcash_name, s.gcash_number
+                 FROM laundry_shops s
+                 JOIN customers c ON c.shop_id = s.id
+                 WHERE c.id = :cid LIMIT 1"
+            );
+            $stmt->execute([':cid' => $this->customerId]);
+            $row = $stmt->fetch();
+            if ($row) {
+                $row['delivery_available'] = true;
+                $row['delivery_fee'] = 0.0;
+            }
+            return $row ?: null;
+        }
     }
 
     /** Get services for the customer's shop */
@@ -135,18 +156,44 @@ class CustomerController
     {
         $orderRef = 'REQ-' . strtoupper(substr(uniqid('', true), -6));
 
-        $stmt = $this->db->prepare(
-            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status, notes, total_amount_estimated)
-             VALUES (:ref, :cid, :sid, :type, 'Requested', :notes, :total) RETURNING id"
-        );
-        $stmt->execute([
-            ':ref'   => $orderRef,
-            ':cid'   => $this->customerId,
-            ':sid'   => $shopId,
-            ':type'  => $type,
-            ':notes' => $notes,
-            ':total' => $totalAmount,
-        ]);
+        try {
+            $stmt = $this->db->prepare(
+                "INSERT INTO orders (
+                    order_ref, customer_id, shop_id, pickup_delivery_type, order_status,
+                    payment_method, notes, delivery_address, delivery_fee, total_amount_estimated
+                 )
+                 VALUES (
+                    :ref, :cid, :sid, :type, 'Requested',
+                    :payment_method, :notes, :delivery_address, :delivery_fee, :total
+                 ) RETURNING id"
+            );
+            $stmt->execute([
+                ':ref'              => $orderRef,
+                ':cid'              => $this->customerId,
+                ':sid'              => $shopId,
+                ':type'             => $type,
+                ':payment_method'   => $paymentMethod,
+                ':notes'            => $notes,
+                ':delivery_address' => $deliveryAddress,
+                ':delivery_fee'     => $deliveryFee,
+                ':total'            => $totalAmount,
+            ]);
+        } catch (\PDOException $e) {
+            if ($e->getCode() !== '42703') {
+                throw $e;
+            }
+
+            $stmt = $this->db->prepare(
+                "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status)
+                 VALUES (:ref, :cid, :sid, :type, 'Requested') RETURNING id"
+            );
+            $stmt->execute([
+                ':ref'  => $orderRef,
+                ':cid'  => $this->customerId,
+                ':sid'  => $shopId,
+                ':type' => $type,
+            ]);
+        }
         $orderId = $stmt->fetchColumn();
 
         if ($paymentMethod === 'GCash' && !empty($refNum)) {

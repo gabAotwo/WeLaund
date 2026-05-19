@@ -13,12 +13,15 @@ start_session();
 AuthController::requireRole('customer');
 
 $customer = new CustomerController($_SESSION['user_id']);
+$deliveryEnabled = static function ($value): bool {
+    return $value === true || $value === 1 || $value === '1' || $value === 't' || $value === 'true';
+};
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $services = $customer->getShopServices($_SESSION['shop_id']);
     $shop     = $customer->getShop();
     if ($shop) {
-        $shop['delivery_available'] = (bool)$shop['delivery_available'];
+        $shop['delivery_available'] = $deliveryEnabled($shop['delivery_available'] ?? false);
         $shop['delivery_fee']       = (float)$shop['delivery_fee'];
     }
     echo json_encode(['success' => true, 'data' => $services, 'shop' => $shop]);
@@ -36,6 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $total  = (float)($input['total_amount'] ?? 0);
 
     try {
+        if ($type === 'Delivery') {
+            $shop = $customer->getShop();
+            if (!$shop || !$deliveryEnabled($shop['delivery_available'] ?? false)) {
+                echo json_encode(['success' => false, 'message' => 'Delivery is currently unavailable for this shop.']);
+                exit;
+            }
+            $dFee = (float)($shop['delivery_fee'] ?? 0);
+        }
+
         $ref = $customer->createRequest($_SESSION['shop_id'], $type, $pm, $notes, $refNum, $dAddr, $dFee, $total);
         echo json_encode(['success' => true, 'ref' => $ref, 'message' => 'Request sent!']);
     } catch (\Exception $e) {

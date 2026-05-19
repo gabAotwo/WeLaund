@@ -22,6 +22,9 @@ interface EstRow {
 
 const LAUNDRY_TYPES = ['White', 'Colored', 'Blanket'];
 
+const isDeliveryEnabled = (value: unknown) =>
+  value === true || value === 1 || value === '1' || value === 't' || value === 'true';
+
 export default function CustomerRequestPage() {
   const { user, loading: authLoading } = useRequireRole('customer');
   const router = useRouter();
@@ -188,7 +191,7 @@ export default function CustomerRequestPage() {
             { value: 'Pickup',   label: 'Walk-in / Pickup', icon: FiShoppingBag, desc: 'Bring to the shop' },
             { value: 'Delivery', label: 'Delivery',          icon: FiTruck,       desc: 'We pick up from you' },
           ].map(({ value, label, icon: Icon, desc }) => {
-            const isAvailable = value === 'Pickup' || (shop?.delivery_available === true || shop?.delivery_available === 1);
+            const isAvailable = value === 'Pickup' || isDeliveryEnabled(shop?.delivery_available);
             
             return (
               <button 
@@ -215,7 +218,7 @@ export default function CustomerRequestPage() {
         </div>
 
         {/* Delivery Unavailable Message */}
-        {shop?.delivery_available === false && (
+        {shop && !isDeliveryEnabled(shop.delivery_available) && (
           <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-100 rounded-lg">
             <span className="text-red-500 text-xs">⚠️</span>
             <p className="text-[10px] text-red-600 font-semibold">Delivery services are temporarily unavailable at this shop.</p>
