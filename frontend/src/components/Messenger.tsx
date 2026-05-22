@@ -364,7 +364,7 @@ export default function Messenger() {
   if (!user) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 font-sans">
+    <div className="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 z-50 font-sans">
       {/* 1. Launcher button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
@@ -391,7 +391,7 @@ export default function Messenger() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="absolute bottom-20 right-0 w-[360px] h-[550px] flex flex-col bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl rounded-2xl overflow-hidden"
+            className="absolute bottom-16 sm:bottom-20 right-0 w-[calc(100vw-2rem)] sm:w-[360px] h-[calc(100vh-11rem)] sm:h-[550px] max-h-[800px] flex flex-col bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl rounded-2xl overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 bg-gradient-to-r from-sky-500/30 to-indigo-500/30 border-b border-white/10 flex items-center justify-between">
