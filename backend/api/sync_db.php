@@ -1,4 +1,9 @@
 <?php
+// CLI-only: php sync_db.php
+if (php_sapi_name() !== 'cli') {
+    http_response_code(403);
+    exit('Forbidden');
+}
 require_once __DIR__ . '/../config/database.php';
 try {
     $db = Database::getConnection();

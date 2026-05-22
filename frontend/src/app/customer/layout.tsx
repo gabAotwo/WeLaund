@@ -1,6 +1,7 @@
 'use client';
 import CustomerSidebar from '@/components/CustomerSidebar';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import Messenger from '@/components/Messenger';
 import { FiHome, FiSend, FiList, FiUser } from 'react-icons/fi';
 
 const mobileItems = [
@@ -17,7 +18,9 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
       <main className="flex-1 md:ml-64 min-h-screen pt-14 md:pt-0 pb-16 md:pb-0">
         {children}
       </main>
+      <Messenger />
       <MobileBottomNav items={mobileItems} />
     </div>
   );
 }
+

@@ -1,6 +1,8 @@
 'use client';
 import Sidebar from '@/components/Sidebar';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import SuperAdminNotifications from '@/components/SuperAdminNotifications';
+import Messenger from '@/components/Messenger';
 import { FiHome, FiShoppingBag, FiUsers, FiShield } from 'react-icons/fi';
 
 const mobileItems = [
@@ -14,10 +16,15 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   return (
     <div className="flex welaund-bg min-h-screen">
       <Sidebar />
-      <main className="flex-1 md:ml-64 min-h-screen pt-14 md:pt-0 pb-16 md:pb-0">
-        {children}
+      <main className="flex-1 md:ml-64 min-h-screen pt-14 md:pt-0 pb-16 md:pb-0 relative flex flex-col">
+        <SuperAdminNotifications />
+        <div className="flex-1 overflow-y-auto w-full">
+          {children}
+        </div>
       </main>
+      <Messenger />
       <MobileBottomNav items={mobileItems} />
     </div>
   );
 }
+

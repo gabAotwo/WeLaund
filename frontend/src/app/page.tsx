@@ -4,7 +4,7 @@ import Image from 'next/image';
 import {
   FiCheckCircle, FiBarChart2, FiCreditCard, FiArrowRight
 } from 'react-icons/fi';
-import { StatsSection, DetailedFeaturesSection, BentoSection, WhySection } from '@/components/landing/LandingExtras';
+import { StatsSection, DetailedFeaturesSection, BentoSection, WhySection, RolesSection } from '@/components/landing/LandingExtras';
 import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
 import AppPhoneShowcase from '@/components/AppPhoneShowcase';
@@ -38,6 +38,7 @@ export default function LandingPage() {
               {['Features', 'How It Works'].map(l => (
                 <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="text-sm font-bold text-[var(--text-color)] hover:opacity-100 transition-opacity tracking-wide uppercase">{l}</a>
               ))}
+              <Link href="/support" className="text-sm font-bold text-[var(--text-color)] hover:opacity-100 transition-opacity tracking-wide uppercase">Support</Link>
             </div>
             <ThemeToggle />
             <Link href="/login" className="px-5 py-2 sm:px-6 sm:py-2.5 welaund-btn text-[10px] sm:text-xs">Get Started</Link>
@@ -98,6 +99,7 @@ export default function LandingPage() {
         <StatsSection />
         <div id="features"><DetailedFeaturesSection /></div>
         <BentoSection />
+        <RolesSection />
         <WhySection />
 
         {/* HOW IT WORKS */}
@@ -125,9 +127,14 @@ export default function LandingPage() {
           <div className="max-w-4xl mx-auto px-6 text-center welaund-card p-10 lg:p-20 border-cyan-400/20">
             <h2 className="text-4xl lg:text-5xl font-black text-[var(--text-color)] mb-6 tracking-tight">Ready to Modernize?</h2>
             <p className="text-[var(--text-color)]/70 mb-10 text-lg font-medium">Join hundreds of laundry shops already using WashWise to scale.</p>
-            <Link href="/login" className="px-12 py-5 welaund-btn text-base inline-flex items-center gap-3 mx-auto">
-              Get Started for Free <FiArrowRight />
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/login" className="px-12 py-5 welaund-btn text-base inline-flex items-center gap-3">
+                Get Started for Free <FiArrowRight />
+              </Link>
+              <Link href="/request-shop" className="px-12 py-5 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold hover:bg-white/10 transition-all text-[var(--text-color)] inline-flex items-center gap-3">
+                Avail Now as Owner <FiArrowRight />
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -150,9 +157,9 @@ export default function LandingPage() {
               <div className="space-y-6">
                 <h4 className="text-[var(--text-color)] font-black text-sm uppercase tracking-widest">Company</h4>
                 <div className="flex flex-col gap-4 text-slate-400 text-sm font-medium">
-                  <a href="#" className="hover:text-cyan-400 transition-colors">Privacy Policy</a>
-                  <a href="#" className="hover:text-cyan-400 transition-colors">Terms of Service</a>
-                  <a href="#" className="hover:text-cyan-400 transition-colors">Support</a>
+                  <Link href="/privacy" className="hover:text-cyan-400 transition-colors">Privacy Policy</Link>
+                  <Link href="/terms"   className="hover:text-cyan-400 transition-colors">Terms of Service</Link>
+                  <Link href="/support" className="hover:text-cyan-400 transition-colors">Support</Link>
                 </div>
               </div>
             </div>

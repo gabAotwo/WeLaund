@@ -17,6 +17,18 @@ $controller = new SuperAdminController();
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $input  = json_decode(file_get_contents('php://input'), true);
     $id     = $input['id']     ?? '';
+    $action = $input['action'] ?? '';
+
+    if ($action === 'reset_password') {
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => 'id required']);
+            exit;
+        }
+        $res = $controller->resetOwnerPassword($id);
+        echo json_encode($res);
+        exit;
+    }
+
     $status = $input['status'] ?? '';
     if (!$id || !$status) {
         echo json_encode(['success' => false, 'message' => 'id and status required']);

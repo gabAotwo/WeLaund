@@ -4,14 +4,14 @@ ini_set('display_errors', '0');
 error_reporting(0);
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../config/Cors.php';
+require_once __DIR__ . '/../../config/Cors.php';
 Cors::handle(['POST', 'OPTIONS']);
 
-require_once __DIR__ . '/../config/Session.php';
+require_once __DIR__ . '/../../config/Session.php';
 start_session();
 
-require_once __DIR__ . '/../config/Env.php';
-require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../../config/Env.php';
+require_once __DIR__ . '/../../config/Database.php';
 
 if (empty($_SESSION['logged_in'])) {
     http_response_code(401);
@@ -22,18 +22,26 @@ if (empty($_SESSION['logged_in'])) {
 $role   = $_SESSION['role']   ?? '';
 $userId = $_SESSION['user_id'] ?? '';
 
-if (!in_array($role, ['customer', 'staff', 'owner'], true) || !$userId) {
+if (!$userId || !$role) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Forbidden']);
     exit;
 }
 
-if (empty($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-    echo json_encode(['success' => false, 'message' => 'No file uploaded or upload error']);
+if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+    echo json_encode(['success' => false, 'message' => 'No image uploaded or upload error']);
     exit;
 }
 
-$file    = $_FILES['avatar'];
+$file = $_FILES['image'];
+
+// Max size: 5MB
+$maxSize = 5 * 1024 * 1024;
+if ($file['size'] > $maxSize) {
+    echo json_encode(['success' => false, 'message' => 'File too large. Maximum size is 5MB.']);
+    exit;
+}
+
 $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 $finfo   = new finfo(FILEINFO_MIME_TYPE);
 $mime    = $finfo->file($file['tmp_name']);
@@ -51,12 +59,10 @@ $apiSecret = Env::get('CLOUDINARY_API_SECRET');
 
 // ── Build signed upload params ──
 $timestamp  = time();
-$publicId   = 'avatars/' . $role . '_' . $userId;
+$publicId   = 'chats/chat_' . uniqid() . '_' . bin2hex(random_bytes(4));
 $paramsToSign = [
-    'overwrite'   => 'true',
     'public_id'   => $publicId,
     'timestamp'   => $timestamp,
-    'transformation' => 'c_fill,w_400,h_400,q_auto',
 ];
 ksort($paramsToSign);
 $signStr = '';
@@ -68,12 +74,10 @@ $signature = sha1($signStr);
 
 // ── POST to Cloudinary ──
 $postFields = [
-    'file'           => new CURLFile($file['tmp_name'], $mime, 'avatar'),
+    'file'           => new CURLFile($file['tmp_name'], $mime, 'image'),
     'api_key'        => $apiKey,
     'timestamp'      => $timestamp,
     'public_id'      => $publicId,
-    'overwrite'      => 'true',
-    'transformation' => 'c_fill,w_400,h_400,q_auto',
     'signature'      => $signature,
 ];
 
@@ -88,27 +92,14 @@ curl_close($ch);
 $result = json_decode($response, true);
 
 if ($httpCode !== 200 || empty($result['secure_url'])) {
-    error_log('[upload_avatar] Cloudinary error: ' . $response);
+    error_log('[upload_chat_image] Cloudinary error: ' . $response);
     echo json_encode(['success' => false, 'message' => 'Cloudinary upload failed.']);
     exit;
 }
 
-$photoUrl = $result['secure_url'];
-
-// ── Save URL to DB ──
-$db    = Database::getConnection();
-$table = match($role) {
-    'customer' => 'customers',
-    'staff'    => 'staff',
-    'owner'    => 'owners',
-    default    => 'customers'
-};
-
-$stmt = $db->prepare("UPDATE {$table} SET profile_photo = :photo WHERE id = :id");
-$ok   = $stmt->execute([':photo' => $photoUrl, ':id' => $userId]);
+$imageUrl = $result['secure_url'];
 
 echo json_encode([
-    'success'   => $ok,
-    'message'   => $ok ? 'Avatar updated' : 'DB update failed',
-    'photo_url' => $photoUrl,
+    'success'   => true,
+    'image_url' => $imageUrl,
 ]);

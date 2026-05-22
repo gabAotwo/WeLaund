@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiZap, FiBarChart2, FiCreditCard, FiSmartphone, FiShield, FiClock,
   FiTrendingUp, FiLayers, FiUsers, FiCheckCircle, FiStar, FiChevronLeft, FiChevronRight,
-  FiActivity, FiFileText, FiServer, FiLock
+  FiActivity, FiFileText, FiServer, FiLock,
+  FiHome, FiUser, FiLogOut, FiPlus, FiMenu, FiBox, FiDollarSign, FiSettings, FiCheckSquare, FiList
 } from 'react-icons/fi';
 
 const ACCENT_COLOR = "#0692abff"; 
@@ -281,6 +282,342 @@ export function BentoSection() {
           <FiSmartphone size={60} className="text-cyan-600 dark:text-cyan-400 mb-8 animate-float" />
           <h3 className="text-2xl font-black text-[#3B7597] mb-2">Mobile First</h3>
           <p className="text-[#3B7597] opacity-80 text-sm font-medium">Staff can process orders directly from a tablet or phone.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+//  ROLES SECTION
+// ─────────────────────────────────────────────────────────
+
+const ROLES = [
+  {
+    key: 'owner',
+    label: 'Owner Dashboard',
+    caption: 'Manage multiple branches, track real-time earnings, and control shop parameters.',
+    checks: ['Revenue tracking', 'Shop status control', 'Pending registrations', 'Analytics overview'],
+    screen: OwnerScreen,
+  },
+  {
+    key: 'staff',
+    label: 'Staff Interface',
+    caption: 'Streamline daily operations, log laundry weights, and update order lifecycles instantly.',
+    checks: ['Active task queue', 'Weight calculator', 'Order status updates', 'Ready for pickup list'],
+    screen: StaffScreen,
+  },
+  {
+    key: 'customer',
+    label: 'Customer App',
+    caption: 'Book orders in seconds, choose preferences, and track laundry progress in real time.',
+    checks: ['Request order form', 'Service selection', 'GCash / Cash payment', 'Live status tracking'],
+    screen: CustomerScreen,
+  },
+];
+
+function OwnerScreen() {
+  return (
+    <div className="flex flex-col h-full bg-[#0a1020] text-white overflow-hidden relative">
+      <div className="flex-1 p-3 overflow-hidden flex flex-col gap-2.5">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-5 h-5 rounded-full bg-slate-700 overflow-hidden border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/70">
+            A
+          </div>
+          <div>
+            <div className="text-[10px] font-black flex items-center gap-1">Hello, Anthony! <span className="text-[8px]">👋</span></div>
+            <div className="text-[6px] text-white/50">Business Dashboard — Shoptest</div>
+          </div>
+        </div>
+
+        {/* Shop Settings Btn */}
+        <div className="rounded-lg py-1.5 px-2 flex items-center justify-center gap-1 w-max" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <FiSettings size={6} className="text-white/70" />
+          <span className="text-[6px] font-bold text-white/70">Shop Settings</span>
+        </div>
+
+        {/* 6 Cards Grid */}
+        <div className="grid grid-cols-2 gap-1.5 flex-1">
+          {[
+            { label: 'DAILY INCOME', value: '₱0.00', icon: FiTrendingUp, color: '#0ea5e9' },
+            { label: 'MONTHLY INCOME', value: '₱140.00', icon: FiBarChart2, color: '#8b5cf6' },
+            { label: 'TOTAL STAFF', value: '1', icon: FiUsers, color: '#6366f1' },
+            { label: 'CUSTOMERS', value: '6', icon: FiUsers, color: '#10b981' },
+            { label: 'SERVICES', value: '2', icon: FiBox, color: '#f59e0b' },
+            { label: 'YEARLY TOTAL', value: '₱140.00', icon: FiBarChart2, color: '#ef4444' },
+          ].map((s, i) => (
+             <div key={i} className="rounded-xl p-2 flex flex-col gap-1 justify-center relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="w-5 h-5 rounded-md flex items-center justify-center mb-0.5" style={{ background: `${s.color}15` }}>
+                  <s.icon size={8} color={s.color} />
+                </div>
+                <div className="text-[10px] font-black tracking-tight">{s.value}</div>
+                <div className="text-[4px] text-white/50 font-bold tracking-wider uppercase">{s.label}</div>
+             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Nav */}
+      <div className="h-10 bg-[#0a0f1d] border-t border-white/5 flex items-center justify-around px-1 mt-auto">
+        {[
+          { icon: FiHome, label: 'HOME', active: true },
+          { icon: FiUsers, label: 'STAFF' },
+          { icon: FiBox, label: 'SERVICES' },
+          { icon: FiSettings, label: 'SETTINGS' },
+          { icon: FiLogOut, label: 'LOGOUT', red: true }
+        ].map((item, i) => (
+          <div key={i} className="flex flex-col items-center gap-0.5 relative w-8">
+            {item.active && <div className="absolute -top-[11px] w-4 h-[2px] bg-cyan-400 rounded-b-sm" />}
+            <item.icon size={9} className={item.active ? "text-cyan-400" : (item.red ? "text-red-400/70" : "text-white/40")} />
+            <span className={`text-[4px] font-bold ${item.active ? "text-cyan-400" : (item.red ? "text-red-400/70" : "text-white/40")}`}>{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StaffScreen() {
+  return (
+    <div className="flex flex-col h-full bg-[#0a1020] text-white overflow-hidden relative">
+      <div className="flex-1 p-3 overflow-hidden flex flex-col gap-2.5">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-5 h-5 rounded-full bg-slate-700 overflow-hidden border border-white/10 flex items-center justify-center">
+            <FiUser size={10} className="text-white/50" />
+          </div>
+          <div>
+            <div className="text-[10px] font-black flex items-center gap-1">Hello, Staff! <span className="text-[8px]">👋</span></div>
+            <div className="text-[6px] text-white/50">Shoptest — Staff Dashboard</div>
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className="rounded-lg py-2 flex items-center justify-center gap-1 shadow-lg mb-1" style={{ background: 'linear-gradient(90deg, #0ea5e9, #8b5cf6)' }}>
+          <FiPlus size={8} />
+          <span className="text-[8px] font-bold">New Order</span>
+        </div>
+
+        {/* Stats Cards */}
+        {[
+          { label: 'DAILY COLLECTION', value: '₱2,450', icon: FiDollarSign, color: '#10b981' },
+          { label: 'ONGOING ORDERS', value: '3', icon: FiClock, color: '#0ea5e9' },
+          { label: 'PENDING APPROVALS', value: '4', icon: FiUsers, color: '#f59e0b' },
+        ].map((s, i) => (
+          <div key={i} className="rounded-xl p-2.5 flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${s.color}20` }}>
+              <s.icon size={12} color={s.color} />
+            </div>
+            <div>
+              <div className="text-[5px] text-white/50 font-bold tracking-wider mb-0.5">{s.label}</div>
+              <div className="text-[12px] font-black">{s.value}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom Nav */}
+      <div className="h-10 bg-[#0a0f1d] border-t border-white/5 flex items-center justify-around px-1 mt-auto">
+        {[
+          { icon: FiHome, label: 'HOME', active: true },
+          { icon: FiPlus, label: 'NEW' },
+          { icon: FiList, label: 'ORDERS' },
+          { icon: FiCheckSquare, label: 'APPROVALS' },
+          { icon: FiSettings, label: 'SETTINGS' },
+          { icon: FiLogOut, label: 'LOGOUT', red: true }
+        ].map((item, i) => (
+          <div key={i} className="flex flex-col items-center gap-0.5 relative w-7">
+            {item.active && <div className="absolute -top-[11px] w-4 h-[2px] bg-cyan-400 rounded-b-sm" />}
+            <item.icon size={9} className={item.active ? "text-cyan-400" : (item.red ? "text-red-400/70" : "text-white/40")} />
+            <span className={`text-[3.5px] font-bold ${item.active ? "text-cyan-400" : (item.red ? "text-red-400/70" : "text-white/40")}`}>{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CustomerScreen() {
+  return (
+    <div className="flex flex-col h-full bg-[#0a1020] text-white overflow-hidden relative">
+      {/* Scrollable area */}
+      <div className="flex-1 p-3 overflow-hidden flex flex-col gap-3">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-5 h-5 rounded-full bg-slate-700 overflow-hidden border border-white/10 flex items-center justify-center">
+            <FiUser size={10} className="text-white/50" />
+          </div>
+          <div>
+            <div className="text-[10px] font-black flex items-center gap-1">Hello, Anton! <span className="text-[8px]">👋</span></div>
+            <div className="text-[6px] text-white/50">Tracking your laundry at Shoptest</div>
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className="rounded-lg py-2 flex items-center justify-center gap-1 shadow-lg" style={{ background: 'linear-gradient(90deg, #0ea5e9, #8b5cf6)' }}>
+          <FiPlus size={8} />
+          <span className="text-[8px] font-bold">Request Laundry</span>
+        </div>
+
+        {/* Ongoing */}
+        <div className="rounded-xl p-2.5 flex flex-col gap-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center gap-1.5 text-[8px] font-bold">
+            <FiBox size={10} className="text-cyan-400" />
+            Ongoing Laundry
+          </div>
+          <div className="border-t border-white/5 pt-3 pb-2 flex flex-col items-center gap-1">
+            <FiBox size={14} className="text-white/20" />
+            <div className="text-[7px] text-white/40">No active orders</div>
+            <div className="text-[5px] text-white/30">Your fresh laundry is just one request away!</div>
+          </div>
+        </div>
+
+        {/* History */}
+        <div className="rounded-xl p-2.5 flex flex-col gap-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center justify-between text-[8px] font-bold">
+            <span>Recent History</span>
+            <span className="text-[6px] text-cyan-400">View All →</span>
+          </div>
+          <div className="border-t border-white/5 pt-2 flex flex-col gap-1.5">
+            {[
+              { id: 'REQ-680453', date: '5/18', status: 'Done', pay: 'PAID' },
+              { id: 'REQ-783159', date: '5/17', status: 'Done', pay: 'PAID' },
+              { id: 'REQ-128873', date: '5/17', status: 'Cancel', pay: 'UNPAID', isCancel: true }
+            ].map(h => (
+              <div key={h.id} className="flex items-center justify-between text-[6px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold">{h.id}</span>
+                  <span className="text-white/40 text-[5px]">{h.date}</span>
+                </div>
+                <div className="flex gap-1">
+                  <span className={`px-1 rounded-sm ${h.isCancel ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>{h.status}</span>
+                  <span className={`px-1 rounded-sm ${h.isCancel ? 'bg-orange-500/20 text-orange-400' : 'bg-indigo-500/20 text-indigo-400'}`}>{h.pay}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Nav */}
+      <div className="h-10 bg-[#0a0f1d] border-t border-white/5 flex items-center justify-around px-1 mt-auto">
+        {[
+          { icon: FiHome, label: 'HOME', active: true },
+          { icon: FiPlus, label: 'REQUEST' },
+          { icon: FiList, label: 'ORDERS' },
+          { icon: FiUser, label: 'PROFILE' },
+          { icon: FiLogOut, label: 'LOGOUT', red: true }
+        ].map((item, i) => (
+          <div key={i} className="flex flex-col items-center gap-0.5 relative w-8">
+            {item.active && <div className="absolute -top-[11px] w-4 h-[2px] bg-cyan-400 rounded-b-sm" />}
+            <item.icon size={10} className={item.active ? "text-cyan-400" : (item.red ? "text-red-400/70" : "text-white/40")} />
+            <span className={`text-[4px] font-bold ${item.active ? "text-cyan-400" : (item.red ? "text-red-400/70" : "text-white/40")}`}>{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function RolesSection() {
+  const [active, setActive] = useState(0);
+  const role = ROLES[active];
+  const Screen = role.screen;
+
+  return (
+    <div className="py-32">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16 lg:mb-24">
+          <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.4em] mb-4 block">Multi-Role Platform</span>
+          <h2 className="text-4xl lg:text-5xl font-black tracking-tight text-slate-800 dark:text-white">Built for Every Role</h2>
+          <p className="mt-4 font-medium text-base lg:text-lg max-w-xl mx-auto text-slate-600 dark:text-white/60">One platform that orchestrates multi-role workflows — from shop owners to staff to customers.</p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-16 items-center">
+
+          {/* Left — text */}
+          <div className="lg:w-1/2 space-y-8">
+            {/* Toggle buttons */}
+            <div className="flex flex-wrap gap-3">
+              {ROLES.map((r, i) => (
+                <button
+                  key={r.key}
+                  onClick={() => setActive(i)}
+                  style={{
+                    background:  active === i ? 'rgba(0,240,255,0.12)' : 'rgba(255,255,255,0.04)',
+                    border:      active === i ? '1px solid rgba(0,240,255,0.35)' : '1px solid rgba(255,255,255,0.08)',
+                    boxShadow:   active === i ? '0 0 20px rgba(0,240,255,0.15)' : 'none',
+                  }}
+                  className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all duration-300 ${
+                    active === i ? 'text-cyan-400' : 'text-slate-600 dark:text-white/45'
+                  }`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Caption */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <p className="text-lg font-medium leading-relaxed text-slate-600 dark:text-white/70">{role.caption}</p>
+                <ul className="space-y-3">
+                  {role.checks.map((c, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm font-semibold text-slate-600 dark:text-white/70">
+                      <FiCheckCircle size={15} className="text-cyan-400 shrink-0" />
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Right — phone mockup */}
+          <div className="lg:w-1/2 flex justify-center">
+            <div className="relative">
+              {/* Glow */}
+              <div className="absolute inset-0 rounded-[3rem] blur-3xl opacity-20" style={{ background: 'radial-gradient(circle, #00f0ff, transparent 70%)' }} />
+
+              {/* Phone frame */}
+              <div className="relative w-[220px] rounded-[2.8rem] p-[3px]" style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.04))' }}>
+                <div className="w-full rounded-[2.6rem] overflow-hidden" style={{ background: '#080e1f', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  {/* Notch */}
+                  <div className="flex justify-center pt-3 pb-1">
+                    <div className="w-16 h-4 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                  </div>
+                  {/* Screen */}
+                  <div className="mx-2 mb-3 rounded-[1.8rem] overflow-hidden" style={{ height: '380px', background: '#0a1020' }}>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={active}
+                        initial={{ opacity: 0, scale: 0.97 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.97 }}
+                        transition={{ duration: 0.3 }}
+                        className="h-full"
+                      >
+                        <Screen />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                  {/* Home bar */}
+                  <div className="flex justify-center pb-3">
+                    <div className="w-20 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

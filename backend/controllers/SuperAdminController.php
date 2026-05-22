@@ -184,6 +184,64 @@ class SuperAdminController
         return $stmt->execute([':status' => $status, ':id' => $ownerId]);
     }
 
+    /**
+     * Generate a secure 8-character temporary password that contains:
+     * - Mix of uppercase and lowercase letters
+     * - Mix of numbers
+     * - Exactly 1 special character
+     */
+    private function generateSecureTempPassword(): string
+    {
+        $uppers = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $lowers = 'abcdefghijkmnopqrstuvwxyz';
+        $digits = '23456789';
+        $specials = '@!#$%&*?';
+
+        $password = '';
+        $password .= $uppers[random_int(0, strlen($uppers) - 1)];
+        $password .= $lowers[random_int(0, strlen($lowers) - 1)];
+        $password .= $digits[random_int(0, strlen($digits) - 1)];
+        $password .= $specials[random_int(0, strlen($specials) - 1)];
+
+        $all = $uppers . $lowers . $digits;
+        for ($i = 0; $i < 4; $i++) {
+            $password .= $all[random_int(0, strlen($all) - 1)];
+        }
+
+        $chars = str_split($password);
+        shuffle($chars);
+        return implode('', $chars);
+    }
+
+    /**
+     * Reset an owner's password to a secure temporary password and return it.
+     */
+    public function resetOwnerPassword(string $ownerId): array
+    {
+        $stmt = $this->db->prepare("SELECT email FROM owners WHERE id = :id");
+        $stmt->execute([':id' => $ownerId]);
+        $email = $stmt->fetchColumn();
+        if (!$email) {
+            return ['success' => false, 'message' => 'Owner not found.'];
+        }
+
+        $newPassword = $this->generateSecureTempPassword();
+        $stmt = $this->db->prepare(
+            "UPDATE owners SET password_hash = :hash WHERE id = :id"
+        );
+        $ok = $stmt->execute([
+            ':hash' => password_hash($newPassword, PASSWORD_BCRYPT),
+            ':id'   => $ownerId
+        ]);
+
+        return [
+            'success' => $ok,
+            'message' => $ok ? 'Password reset successfully.' : 'Failed to reset password.',
+            'temp_password' => $newPassword,
+            'email' => $email
+        ];
+    }
+
     // ─────────────────────────────────────────────────────────
     //  STAFF  (global view)
     // ─────────────────────────────────────────────────────────
@@ -228,6 +286,146 @@ class SuperAdminController
 
         $stmt = $this->db->prepare('UPDATE customers SET status = :status WHERE id = :id');
         return $stmt->execute([':status' => $status, ':id' => $customerId]);
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  OWNER REQUESTS (B2B onboarding)
+    // ─────────────────────────────────────────────────────────
+
+    public function getOwnerRequests(string $status = 'pending'): array
+    {
+        $allowed = ['pending', 'approved', 'rejected', 'all'];
+        if (!in_array($status, $allowed, true)) $status = 'pending';
+
+        if ($status === 'all') {
+            return $this->db->query(
+                'SELECT * FROM owner_requests ORDER BY created_at DESC'
+            )->fetchAll();
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT * FROM owner_requests WHERE status = :status ORDER BY created_at DESC'
+        );
+        $stmt->execute([':status' => $status]);
+        return $stmt->fetchAll();
+    }
+
+    public function rejectOwnerRequest(int $id): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE owner_requests SET status = 'rejected' WHERE id = :id AND status = 'pending'"
+        );
+        return $stmt->execute([':id' => $id]) && $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Approve a request: create owner + shop, send welcome email, mark approved.
+     * Returns ['success'=>bool, 'message'=>string]
+     */
+    public function approveOwnerRequest(int $requestId, string $approvedBy): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM owner_requests WHERE id = :id AND status = 'pending'"
+        );
+        $stmt->execute([':id' => $requestId]);
+        $req = $stmt->fetch();
+
+        if (!$req) {
+            return ['success' => false, 'message' => 'Request not found or already processed.'];
+        }
+
+        // Split owner_name into first/last
+        $parts     = explode(' ', trim($req['owner_name']), 2);
+        $firstName = $parts[0];
+        $lastName  = $parts[1] ?? '';
+
+        // Generate temporary password (exactly 8 characters with complex rules)
+        $tempPassword = $this->generateSecureTempPassword();
+
+        $this->db->beginTransaction();
+        try {
+            // 1. Create owner account
+            $o = $this->db->prepare(
+                'INSERT INTO owners (first_name, last_name, email, contact_number, password_hash, created_by)
+                 VALUES (:fn, :ln, :email, :phone, :pwd, :cb) RETURNING id'
+            );
+            $o->execute([
+                ':fn'    => $firstName,
+                ':ln'    => $lastName,
+                ':email' => strtolower($req['email']),
+                ':phone' => $req['phone'],
+                ':pwd'   => password_hash($tempPassword, PASSWORD_BCRYPT),
+                ':cb'    => $approvedBy,
+            ]);
+            $ownerId = $o->fetchColumn();
+
+            // 2. Create laundry shop
+            $s = $this->db->prepare(
+                'INSERT INTO laundry_shops (owner_id, shop_name, created_by)
+                 VALUES (:oid, :name, :cb)'
+            );
+            $s->execute([
+                ':oid'  => $ownerId,
+                ':name' => $req['shop_name'],
+                ':cb'   => $approvedBy,
+            ]);
+
+            // 3. Mark request approved
+            $this->db->prepare(
+                "UPDATE owner_requests SET status = 'approved' WHERE id = :id"
+            )->execute([':id' => $requestId]);
+
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'message' => 'Account creation failed: ' . $e->getMessage()];
+        }
+
+        // 4. Send welcome email (non-fatal if it fails)
+        $this->sendWelcomeEmail($req['email'], $req['owner_name'], $req['shop_name'], $tempPassword);
+
+        return [
+            'success' => true,
+            'message' => 'Owner approved and welcome email sent.',
+            'temp_password' => $tempPassword,
+            'email' => $req['email']
+        ];
+    }
+
+    private function sendWelcomeEmail(
+        string $to,
+        string $ownerName,
+        string $shopName,
+        string $tempPassword
+    ): void {
+        require_once __DIR__ . '/../config/Env.php';
+        Env::load();
+
+        $portalUrl = Env::get('FRONTEND_URL', 'http://localhost:3000');
+        $subject   = 'Welcome to WashWise! Your Owner Account is Approved';
+
+        $body = "Dear {$ownerName},\r\n\r\n"
+            . "Fantastic news! Your application to partner with WashWise has been officially reviewed "
+            . "and approved by our network administration team. We are incredibly excited to welcome "
+            . "{$shopName} to our platform.\r\n\r\n"
+            . "Your centralized shop management dashboard is now ready. Log in using the temporary "
+            . "credentials below to begin configuring your services, pricing, and staff roles:\r\n\r\n"
+            . "  Portal Link:        {$portalUrl}/login\r\n"
+            . "  Registered Email:   {$to}\r\n"
+            . "  Temporary Password: {$tempPassword}\r\n\r\n"
+            . "SECURITY NOTICE: Please update this temporary password immediately within your "
+            . "Account Settings upon your very first login.\r\n\r\n"
+            . "Welcome to the WashWise ecosystem.\r\n\r\n"
+            . "Best regards,\r\nThe WashWise Administration Team";
+
+        $headers = implode("\r\n", [
+            'From: WashWise Admin <no-reply@washwise.laundry>',
+            'Reply-To: no-reply@washwise.laundry',
+            'Content-Type: text/plain; charset=UTF-8',
+            'X-Mailer: PHP/' . PHP_VERSION,
+        ]);
+
+        @mail($to, $subject, $body, $headers);
     }
 
     // ─────────────────────────────────────────────────────────
