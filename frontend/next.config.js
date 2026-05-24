@@ -8,9 +8,13 @@ const nextConfig = {
   reactStrictMode: false,
   async rewrites() {
     const isDev = process.env.NODE_ENV === 'development';
-    const backendUrl = isDev 
+    const rawBackendUrl = isDev 
       ? 'http://localhost/pWeB/WEBTECH/backend'
       : (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://welaund-production.up.railway.app');
+    const backendUrl = rawBackendUrl
+      .trim()
+      .replace(/\/+$/, '')
+      .replace(/^(?!https?:\/\/)/, 'https://');
     
     return [
       {
