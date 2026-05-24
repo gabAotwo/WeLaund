@@ -27,7 +27,7 @@ export function StatsSection() {
               <s.icon size={28} className="text-cyan-600 dark:text-cyan-400" />
             </div>
             <div className="text-5xl font-black text-[#3B7597] mb-2 tracking-tighter">{s.value}</div>
-            <div className="text-[#3B7597] opacity-70 font-semibold uppercase tracking-[0.2em] text-[10px]">{s.label}</div>
+            <div className="text-slate-700 dark:text-white/75 font-semibold uppercase tracking-[0.2em] text-[10px]">{s.label}</div>
           </div>
         ))}
       </div>
@@ -227,7 +227,7 @@ export function DetailedFeaturesSection() {
                 {(() => { const Icon = features[index].icon; return <Icon size={28} className="text-cyan-600 dark:text-cyan-400" />; })()}
               </div>
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#3B7597] mb-4 sm:mb-6 tracking-tight">{features[index].title}</h3>
-              <p className="text-[#3B7597] opacity-80 text-lg sm:text-xl leading-relaxed mb-6 sm:mb-10 font-medium">{features[index].desc}</p>
+              <p className="text-slate-700 dark:text-white/75 text-lg sm:text-xl leading-relaxed mb-6 sm:mb-10 font-medium">{features[index].desc}</p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
                 {features[index].bullets.map((b, j) => (
                   <li key={j} className="flex items-center gap-3 text-xs sm:text-sm font-bold text-[#3B7597]/70">
@@ -272,7 +272,7 @@ export function BentoSection() {
         <div className="lg:col-span-8 welaund-card p-8 lg:p-12 relative overflow-hidden group">
           <div className="relative z-10">
             <h3 className="text-3xl lg:text-4xl font-black text-[#3B7597] mb-4 tracking-tight">Ready for Scale</h3>
-            <p className="text-[#3B7597] opacity-80 max-w-md font-medium text-lg">Whether you have one shop or a nationwide chain, WashWise handles the complexity for you.</p>
+            <p className="text-slate-700 dark:text-white/75 max-w-md font-medium text-lg">Whether you have one shop or a nationwide chain, WashWise handles the complexity for you.</p>
           </div>
           <div className="absolute right-0 bottom-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
             <FiTrendingUp size={300} className="text-[#3B7597]" />
@@ -281,7 +281,7 @@ export function BentoSection() {
         <div className="lg:col-span-4 welaund-card p-8 lg:p-12 flex flex-col justify-center items-center text-center">
           <FiSmartphone size={60} className="text-cyan-600 dark:text-cyan-400 mb-8 animate-float" />
           <h3 className="text-2xl font-black text-[#3B7597] mb-2">Mobile First</h3>
-          <p className="text-[#3B7597] opacity-80 text-sm font-medium">Staff can process orders directly from a tablet or phone.</p>
+          <p className="text-slate-700 dark:text-white/75 text-sm font-medium">Staff can process orders directly from a tablet or phone.</p>
         </div>
       </div>
     </div>
@@ -531,7 +531,7 @@ export function RolesSection() {
         <div className="text-center mb-16 lg:mb-24">
           <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.4em] mb-4 block">Multi-Role Platform</span>
           <h2 className="text-4xl lg:text-5xl font-black tracking-tight text-slate-800 dark:text-white">Built for Every Role</h2>
-          <p className="mt-4 font-medium text-base lg:text-lg max-w-xl mx-auto text-slate-600 dark:text-white/60">One platform that orchestrates multi-role workflows — from shop owners to staff to customers.</p>
+          <p className="mt-4 font-medium text-base lg:text-lg max-w-xl mx-auto text-slate-700 dark:text-white/75">One platform that orchestrates multi-role workflows — from shop owners to staff to customers.</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-16 items-center">
@@ -550,7 +550,7 @@ export function RolesSection() {
                     boxShadow:   active === i ? '0 0 20px rgba(0,240,255,0.15)' : 'none',
                   }}
                   className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all duration-300 ${
-                    active === i ? 'text-cyan-400' : 'text-slate-600 dark:text-white/45'
+                    active === i ? 'text-cyan-400' : 'text-slate-700 dark:text-white/70'
                   }`}
                 >
                   {r.label}
@@ -568,10 +568,10 @@ export function RolesSection() {
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                <p className="text-lg font-medium leading-relaxed text-slate-600 dark:text-white/70">{role.caption}</p>
+                <p className="text-lg font-medium leading-relaxed text-slate-700 dark:text-white/75">{role.caption}</p>
                 <ul className="space-y-3">
                   {role.checks.map((c, i) => (
-                    <li key={i} className="flex items-center gap-3 text-sm font-semibold text-slate-600 dark:text-white/70">
+                    <li key={i} className="flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-white/75">
                       <FiCheckCircle size={15} className="text-cyan-400 shrink-0" />
                       {c}
                     </li>
@@ -645,7 +645,7 @@ export function WhySection() {
                 <b.icon className="text-[#3B7597]/40 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors" size={24} />
               </div>
               <h4 className="text-lg font-black text-[#3B7597] mb-3 tracking-tight">{b.title}</h4>
-              <p className="text-[#3B7597] opacity-70 text-sm font-medium leading-relaxed">{b.desc}</p>
+              <p className="text-slate-700 dark:text-white/75 text-sm font-medium leading-relaxed">{b.desc}</p>
             </div>
           ))}
         </div>

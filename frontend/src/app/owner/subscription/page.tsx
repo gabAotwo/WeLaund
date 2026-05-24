@@ -41,7 +41,7 @@ export default function OwnerSubscriptionPage() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, amount }),
+        body: JSON.stringify(form),
       });
       const res = await readJson(response);
       if (res.success) {
@@ -88,6 +88,7 @@ export default function OwnerSubscriptionPage() {
             <div className="rounded-2xl p-4" style={{ background:'rgba(255,255,255,0.06)' }}>
               <p className="text-[10px] text-white/35 font-bold uppercase">Monthly Fee</p>
               <p className="font-black text-white text-xl mt-1">₱{amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</p>
+              <p className="text-[10px] text-white/30 mt-1">Set by super admin</p>
             </div>
             <div className="rounded-2xl p-4" style={{ background:'rgba(255,255,255,0.06)' }}>
               <p className="text-[10px] text-white/35 font-bold uppercase">Days Left</p>

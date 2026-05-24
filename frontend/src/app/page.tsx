@@ -108,14 +108,14 @@ export default function LandingPage() {
             <div className="text-center mb-16 lg:mb-24">
               <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.4em] mb-4 block">Our Workflow</span>
               <h2 className="text-4xl lg:text-5xl font-black text-[var(--text-color)] tracking-tight">How WashWise Works</h2>
-              <p className="text-[var(--text-color)]/70 mt-4 font-medium text-base lg:text-lg">Four simple steps from drop-off to fresh pickup.</p>
+              <p className="text-slate-700 dark:text-white/75 mt-4 font-medium text-base lg:text-lg">Four simple steps from drop-off to fresh pickup.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 text-center">
               {STEPS.map(({ n, title, desc }) => (
                 <div key={n} className="group animate-slideup">
                   <div className="w-20 h-20 rounded-full mx-auto mb-8 flex items-center justify-center text-2xl font-black text-[var(--text-color)] bg-white/5 border border-white/5 group-hover:border-cyan-400/30 group-hover:bg-cyan-400/10 transition-all duration-500">{n}</div>
                   <h3 className="text-xl font-black text-[var(--text-color)] mb-3 tracking-tight">{title}</h3>
-                  <p className="text-[var(--text-color)]/70 text-sm font-medium leading-relaxed">{desc}</p>
+                  <p className="text-slate-700 dark:text-white/75 text-sm font-medium leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
@@ -126,7 +126,7 @@ export default function LandingPage() {
         <section className="py-40 relative overflow-hidden">
           <div className="max-w-4xl mx-auto px-6 text-center welaund-card p-10 lg:p-20 border-cyan-400/20">
             <h2 className="text-4xl lg:text-5xl font-black text-[var(--text-color)] mb-6 tracking-tight">Ready to Modernize?</h2>
-            <p className="text-[var(--text-color)]/70 mb-10 text-lg font-medium">Join hundreds of laundry shops already using WashWise to scale.</p>
+            <p className="text-slate-700 dark:text-white/75 mb-10 text-lg font-medium">Join hundreds of laundry shops already using WashWise to scale.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/login" className="px-12 py-5 welaund-btn text-base inline-flex items-center gap-3">
                 Get Started for Free <FiArrowRight />

@@ -26,7 +26,7 @@ class StaffController
             'SELECT id, first_name, last_name, email, contact_number, status, last_updated, profile_photo
              FROM customers
              WHERE shop_id = :shop_id AND status = \'Pending\'
-             ORDER BY last_updated ASC'
+             ORDER BY last_updated DESC'
         );
         $stmt->execute([':shop_id' => $this->shopId]);
         $rows = $stmt->fetchAll();

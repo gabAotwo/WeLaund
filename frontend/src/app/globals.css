@@ -120,6 +120,18 @@ body {
   transform: scale(0.98);
 }
 
+.themed-select,
+.themed-select option {
+  color: #0f172a;
+  background-color: #f8fafc;
+}
+
+.dark .themed-select,
+.dark .themed-select option {
+  color: #ffffff;
+  background-color: #020617;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

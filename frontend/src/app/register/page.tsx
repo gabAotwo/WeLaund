@@ -145,9 +145,9 @@ export default function RegisterPage() {
 
               <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-1 custom-scroll">
                 <Field label="Select Laundry Shop" icon={FiMapPin}>
-                  <select value={form.shop_id} onChange={e => setF('shop_id', e.target.value)} className={inputCls}>
-                    <option value="" disabled className="bg-[#020617]">Choose a location...</option>
-                    {shops.map(s => <option key={s.id} value={s.id} className="bg-[#020617]">{s.name}</option>)}
+                  <select value={form.shop_id} onChange={e => setF('shop_id', e.target.value)} className={`${inputCls} themed-select`}>
+                    <option value="" disabled>Choose a location...</option>
+                    {shops.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </Field>
                 <div className="grid grid-cols-2 gap-4">

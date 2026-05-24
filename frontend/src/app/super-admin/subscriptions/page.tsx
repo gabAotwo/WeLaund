@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
 import { fetchJson, readJson } from '@/lib/api';
-import { FiAlertTriangle, FiCheck, FiClock, FiCreditCard, FiRefreshCw, FiX } from 'react-icons/fi';
+import { FiAlertTriangle, FiCheck, FiClock, FiCreditCard, FiRefreshCw, FiSave, FiX } from 'react-icons/fi';
 
 const CARD = { background:'rgba(10,20,50,0.72)', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:'1.25rem' };
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -12,6 +12,8 @@ export default function SuperAdminSubscriptionsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
+  const [savingBilling, setSavingBilling] = useState<string | null>(null);
+  const [billingDrafts, setBillingDrafts] = useState<Record<string, any>>({});
 
   const load = async () => {
     setLoading(true);
@@ -26,6 +28,7 @@ export default function SuperAdminSubscriptionsPage() {
 
   const summary = data?.summary || {};
   const payments = data?.payments || [];
+  const shops = data?.shops || [];
   const currentYear = new Date().getFullYear();
   const series = useMemo(() => MONTHS.map((label, i) => {
     const row = (data?.monthly || []).find((m: any) => Number(m.year) === currentYear && Number(m.month) === i + 1);
@@ -50,6 +53,50 @@ export default function SuperAdminSubscriptionsPage() {
       alert('Review failed.');
     } finally {
       setActing(null);
+    }
+  };
+
+  const draftFor = (shop: any) => billingDrafts[shop.shop_id] || {
+    subscription_monthly_fee: shop.subscription_monthly_fee,
+    subscription_due_date: shop.subscription_due_date || '',
+    subscription_status: shop.subscription_status || 'active',
+    note: shop.subscription_note || '',
+  };
+
+  const setDraft = (shop: any, patch: Record<string, any>) => {
+    setBillingDrafts(prev => ({ ...prev, [shop.shop_id]: { ...draftFor(shop), ...patch } }));
+  };
+
+  const saveBilling = async (shop: any) => {
+    const draft = draftFor(shop);
+    setSavingBilling(shop.shop_id);
+    try {
+      const response = await fetch('/api/super_admin/subscriptions.php', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_billing',
+          shop_id: shop.shop_id,
+          subscription_monthly_fee: Number(draft.subscription_monthly_fee),
+          subscription_due_date: draft.subscription_due_date,
+          subscription_status: draft.subscription_status,
+          note: draft.note,
+        }),
+      });
+      const res = await readJson(response);
+      if (res.success) {
+        setBillingDrafts(prev => {
+          const next = { ...prev };
+          delete next[shop.shop_id];
+          return next;
+        });
+        load();
+      } else alert(res.message || 'Billing update failed.');
+    } catch {
+      alert('Billing update failed.');
+    } finally {
+      setSavingBilling(null);
     }
   };
 
@@ -91,6 +138,57 @@ export default function SuperAdminSubscriptionsPage() {
               <span className="text-[10px] font-black text-white/40 uppercase">{m.label}</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="p-4 sm:p-5" style={CARD}>
+        <div className="mb-4">
+          <h3 className="font-black text-white text-sm">Shop Billing Settings</h3>
+          <p className="text-xs text-white/35 mt-1">Set each owner's monthly fee, due date, and billing state.</p>
+        </div>
+        <div className="space-y-3">
+          {shops.length === 0 ? <p className="text-center text-white/30 py-10 text-sm">No shops found.</p> : shops.map((shop: any) => {
+            const draft = draftFor(shop);
+            return (
+              <div key={shop.shop_id} className="rounded-2xl p-4 space-y-4" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.06)' }}>
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-black text-white text-sm">{shop.shop_name}</p>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background:shop.subscription_status==='overdue'?'rgba(239,68,68,0.15)':shop.subscription_status==='pending_review'?'rgba(245,158,11,0.15)':'rgba(16,185,129,0.15)', color:shop.subscription_status==='overdue'?'#f87171':shop.subscription_status==='pending_review'?'#fbbf24':'#34d399' }}>{shop.subscription_status || 'active'}</span>
+                    </div>
+                    <p className="text-xs text-white/40 truncate">{shop.first_name} {shop.last_name} - {shop.email}</p>
+                    <p className="text-xs text-white/25">Last paid: {shop.subscription_last_paid_at ? new Date(shop.subscription_last_paid_at).toLocaleDateString() : 'Never'}</p>
+                  </div>
+                  <button disabled={savingBilling===shop.shop_id} onClick={() => saveBilling(shop)} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black text-white disabled:opacity-50 lg:shrink-0" style={{ background:'linear-gradient(90deg,#00aeef,#6366f1,#8e66ff)' }}>
+                    <FiSave size={13}/> {savingBilling===shop.shop_id ? 'Saving...' : 'Save Billing'}
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <label className="space-y-1.5">
+                    <span className="text-[10px] text-white/35 font-black uppercase tracking-wide">Monthly Fee</span>
+                    <input type="number" min="1" step="0.01" value={draft.subscription_monthly_fee} onChange={e => setDraft(shop, { subscription_monthly_fee: e.target.value })} className="w-full rounded-xl px-3 py-2.5 bg-white/10 text-white placeholder:text-white/30 text-sm outline-none" />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="text-[10px] text-white/35 font-black uppercase tracking-wide">Due Date</span>
+                    <input type="date" value={draft.subscription_due_date || ''} onChange={e => setDraft(shop, { subscription_due_date: e.target.value })} className="w-full rounded-xl px-3 py-2.5 bg-white/10 text-white text-sm outline-none" />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="text-[10px] text-white/35 font-black uppercase tracking-wide">Billing Status</span>
+                    <select value={draft.subscription_status} onChange={e => setDraft(shop, { subscription_status: e.target.value })} className="w-full rounded-xl px-3 py-2.5 bg-white/10 text-white text-sm outline-none">
+                      <option className="text-black" value="active">Active</option>
+                      <option className="text-black" value="pending_review">Pending Review</option>
+                      <option className="text-black" value="overdue">Overdue</option>
+                    </select>
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="text-[10px] text-white/35 font-black uppercase tracking-wide">Admin Note</span>
+                    <input value={draft.note || ''} onChange={e => setDraft(shop, { note: e.target.value })} placeholder="Optional note" className="w-full rounded-xl px-3 py-2.5 bg-white/10 text-white placeholder:text-white/30 text-sm outline-none" />
+                  </label>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

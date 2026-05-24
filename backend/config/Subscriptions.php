@@ -102,10 +102,17 @@ class Subscriptions
         ];
     }
 
-    public static function submitOwnerPayment(string $shopId, string $ownerId, float $amount, string $method, string $reference, string $proofUrl = ''): bool
+    public static function submitOwnerPayment(string $shopId, string $ownerId, string $method, string $reference, string $proofUrl = ''): bool
     {
         self::ensureSchema();
         $db = Database::getConnection();
+        $amountStmt = $db->prepare("SELECT subscription_monthly_fee FROM laundry_shops WHERE id = :shop_id LIMIT 1");
+        $amountStmt->execute([':shop_id' => $shopId]);
+        $amount = (float)$amountStmt->fetchColumn();
+        if ($amount <= 0) {
+            $amount = self::DEFAULT_MONTHLY_FEE;
+        }
+
         $stmt = $db->prepare("
             INSERT INTO owner_subscription_payments (shop_id, owner_id, amount, billing_month, payment_method, reference_number, proof_url)
             VALUES (:shop_id, :owner_id, :amount, DATE_TRUNC('month', CURRENT_DATE)::DATE, :method, :reference, :proof_url)
@@ -122,6 +129,43 @@ class Subscriptions
         if ($ok) {
             $db->prepare("UPDATE laundry_shops SET subscription_status = 'pending_review', subscription_note = 'Subscription payment submitted for review.' WHERE id = :shop_id")
                 ->execute([':shop_id' => $shopId]);
+        }
+
+        return $ok;
+    }
+
+    public static function updateShopBilling(string $shopId, float $monthlyFee, ?string $dueDate, string $subscriptionStatus, string $note = ''): bool
+    {
+        self::ensureSchema();
+        if ($monthlyFee <= 0) return false;
+        if (!in_array($subscriptionStatus, ['active', 'pending_review', 'overdue'], true)) return false;
+        if ($dueDate !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dueDate)) return false;
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare("
+            UPDATE laundry_shops
+            SET subscription_monthly_fee = :monthly_fee,
+                subscription_due_date = COALESCE(CAST(:due_date AS DATE), subscription_due_date),
+                subscription_status = :subscription_status,
+                status = CASE WHEN :subscription_status = 'overdue' THEN 'inactive' ELSE 'active' END,
+                subscription_note = NULLIF(:note, '')
+            WHERE id = :shop_id
+        ");
+        $ok = $stmt->execute([
+            ':monthly_fee' => $monthlyFee,
+            ':due_date' => $dueDate,
+            ':subscription_status' => $subscriptionStatus,
+            ':note' => $note,
+            ':shop_id' => $shopId,
+        ]);
+
+        if ($ok) {
+            $ownerStmt = $db->prepare("
+                UPDATE owners o
+                SET status = CASE WHEN :subscription_status = 'overdue' THEN 'inactive' ELSE 'active' END
+                WHERE EXISTS (SELECT 1 FROM laundry_shops s WHERE s.id = :shop_id AND s.owner_id = o.id)
+            ");
+            $ownerStmt->execute([':subscription_status' => $subscriptionStatus, ':shop_id' => $shopId]);
         }
 
         return $ok;
@@ -227,6 +271,17 @@ class Subscriptions
             LIMIT 100
         ")->fetchAll();
 
-        return ['summary' => $summary, 'monthly' => $monthly, 'payments' => $payments];
+        $shops = $db->query("
+            SELECT s.id AS shop_id, s.shop_name, s.status AS shop_status, s.subscription_status,
+                   s.subscription_due_date, s.subscription_monthly_fee, s.subscription_last_paid_at, s.subscription_note,
+                   o.first_name, o.last_name, o.email, o.status AS owner_status
+            FROM laundry_shops s
+            JOIN owners o ON o.id = s.owner_id
+            ORDER BY CASE s.subscription_status WHEN 'overdue' THEN 1 WHEN 'pending_review' THEN 2 ELSE 3 END,
+                     s.subscription_due_date ASC NULLS LAST,
+                     s.shop_name ASC
+        ")->fetchAll();
+
+        return ['summary' => $summary, 'monthly' => $monthly, 'payments' => $payments, 'shops' => $shops];
     }
 }

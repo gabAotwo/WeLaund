@@ -23,18 +23,17 @@ if (!$shopId || !$ownerId) {
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true) ?? [];
-        $amount = (float)($input['amount'] ?? 0);
         $method = trim((string)($input['payment_method'] ?? 'Manual'));
         $reference = trim((string)($input['reference_number'] ?? ''));
         $proofUrl = trim((string)($input['proof_url'] ?? ''));
 
-        if ($amount <= 0 || $reference === '') {
+        if ($reference === '') {
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Amount and reference number are required.']);
+            echo json_encode(['success' => false, 'message' => 'Reference number is required.']);
             exit;
         }
 
-        $ok = Subscriptions::submitOwnerPayment($shopId, $ownerId, $amount, $method, $reference, $proofUrl);
+        $ok = Subscriptions::submitOwnerPayment($shopId, $ownerId, $method, $reference, $proofUrl);
         echo json_encode(['success' => $ok, 'message' => $ok ? 'Subscription payment submitted for review.' : 'Submission failed.']);
         exit;
     }

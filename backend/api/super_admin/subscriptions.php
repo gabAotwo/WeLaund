@@ -15,6 +15,26 @@ AuthController::requireRole('super_admin');
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $action = (string)($input['action'] ?? 'review');
+
+        if ($action === 'update_billing') {
+            $shopId = (string)($input['shop_id'] ?? '');
+            $monthlyFee = (float)($input['subscription_monthly_fee'] ?? 0);
+            $dueDate = trim((string)($input['subscription_due_date'] ?? ''));
+            $status = trim((string)($input['subscription_status'] ?? 'active'));
+            $note = trim((string)($input['note'] ?? ''));
+
+            if (!$shopId || $monthlyFee <= 0 || !in_array($status, ['active', 'pending_review', 'overdue'], true)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Valid shop, fee, and status are required.']);
+                exit;
+            }
+
+            $ok = Subscriptions::updateShopBilling($shopId, $monthlyFee, $dueDate !== '' ? $dueDate : null, $status, $note);
+            echo json_encode(['success' => $ok, 'message' => $ok ? 'Billing settings updated.' : 'Billing update failed.']);
+            exit;
+        }
+
         $paymentId = (string)($input['id'] ?? '');
         $status = (string)($input['status'] ?? '');
         $note = trim((string)($input['note'] ?? ''));
