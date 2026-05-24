@@ -31,9 +31,9 @@ export default function MobileBottomNav({ items }: Props) {
       }}
     >
       {items.map(({ label, path, icon }) => {
-        const active = pathname === path;
+        const active = pathname === path || pathname.startsWith(path + '/');
         return (
-          <Link key={path} href={path} className="flex flex-col items-center gap-1 flex-1 py-1 relative">
+          <Link key={path} href={path} className="flex flex-col items-center gap-1 flex-1 min-w-0 py-1 relative">
             {active && (
               <span
                 className="absolute -top-0.5 w-6 h-0.5 rounded-full"
@@ -54,7 +54,7 @@ export default function MobileBottomNav({ items }: Props) {
               {icon}
             </span>
             <span
-              className="text-[9px] font-bold uppercase tracking-wide transition-colors duration-200"
+              className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wide transition-colors duration-200 truncate max-w-full px-0.5"
               style={{ color: active ? '#00aeef' : 'rgba(255,255,255,0.3)' }}
             >
               {label}
@@ -66,12 +66,12 @@ export default function MobileBottomNav({ items }: Props) {
       {/* Logout */}
       <button
         onClick={() => logout()}
-        className="flex flex-col items-center gap-1 flex-1 py-1"
+        className="flex flex-col items-center gap-1 flex-1 min-w-0 py-1"
       >
         <span className="text-xl" style={{ color: 'rgba(248,113,113,0.7)' }}>
           <FiLogOut />
         </span>
-        <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: 'rgba(248,113,113,0.6)' }}>
+        <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wide truncate max-w-full px-0.5" style={{ color: 'rgba(248,113,113,0.6)' }}>
           Logout
         </span>
       </button>

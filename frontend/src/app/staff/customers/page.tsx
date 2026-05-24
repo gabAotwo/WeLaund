@@ -67,8 +67,8 @@ export default function StaffCustomersPage() {
   const CustomerCard = ({ c }: { c: Customer }) => {
     const st = statusStyle[c.status] ?? statusStyle.Inactive;
     return (
-      <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 last:border-0 gap-3">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 sm:px-5 py-4 border-b border-white/5 last:border-0 gap-3">
+        <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
           <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10"
             style={{ background: 'rgba(255,255,255,0.06)' }}>
             {c.photo_url
@@ -87,20 +87,20 @@ export default function StaffCustomersPage() {
               </span>
             </div>
             <p className="text-white/40 text-xs truncate mt-0.5">{c.email}</p>
-            <p className="text-white/30 text-xs">{c.contact_number || 'No contact'}</p>
+            <p className="text-white/30 text-xs truncate">{c.contact_number || 'No contact'}</p>
           </div>
         </div>
 
-        <div className="flex gap-2 shrink-0">
+        <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto sm:shrink-0">
           {c.status === 'Pending' && (
             <>
               <button onClick={() => handleAction(c.id, 'Approved')}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105"
+                className="flex items-center justify-center gap-1 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105 min-w-0"
                 style={{ background: 'rgba(16,185,129,0.2)', color: '#34d399' }}>
                 <FiCheck size={12} /> Approve
               </button>
               <button onClick={() => handleAction(c.id, 'Disapproved')}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105"
+                className="flex items-center justify-center gap-1 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105 min-w-0"
                 style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>
                 <FiX size={12} /> Reject
               </button>
@@ -108,7 +108,7 @@ export default function StaffCustomersPage() {
           )}
           {c.status === 'Approved' && (
             <button onClick={() => handleAction(c.id, 'Inactive')}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105"
+              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105 min-w-0"
               style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>
               <FiX size={12} /> Deactivate
             </button>
@@ -120,8 +120,8 @@ export default function StaffCustomersPage() {
 
   const Section = ({ title, rows, emptyMsg }: { title: string; rows: Customer[]; emptyMsg: string }) => (
     <div style={CARD} className="overflow-hidden">
-      <div className="px-5 py-4 border-b border-white/8 flex items-center justify-between">
-        <h3 className="font-black text-white/60 text-xs uppercase tracking-widest">{title}</h3>
+      <div className="px-4 sm:px-5 py-4 border-b border-white/8 flex items-center justify-between gap-3">
+        <h3 className="font-black text-white/60 text-[11px] sm:text-xs uppercase tracking-widest truncate">{title}</h3>
         <span className="text-[10px] font-black px-2 py-0.5 rounded-full text-white/40"
           style={{ background: 'rgba(255,255,255,0.08)' }}>
           {rows.length}
@@ -135,16 +135,16 @@ export default function StaffCustomersPage() {
   );
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6">
+    <div className="w-full max-w-3xl mx-auto space-y-6 px-3 py-4 sm:px-4 md:p-8 overflow-x-hidden">
 
       {/* Header */}
-      <div className="flex flex-wrap justify-between items-center gap-3">
-        <div>
+      <div className="flex flex-col min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-xl md:text-2xl font-black text-white">Customer Approvals</h1>
-          <p className="text-white/40 text-sm mt-0.5">{user?.shop_name}</p>
+          <p className="text-white/40 text-sm mt-0.5 truncate">{user?.shop_name}</p>
         </div>
         <button onClick={fetchCustomers}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white/60 hover:text-white transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white/60 hover:text-white transition-colors w-full min-[420px]:w-auto"
           style={{ background: 'rgba(255,255,255,0.08)' }}>
           <FiRefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           Refresh
@@ -153,7 +153,7 @@ export default function StaffCustomersPage() {
 
       {/* Pending alert */}
       {pending.length > 0 && (
-        <div className="flex items-center gap-3 rounded-2xl px-5 py-4 border border-amber-500/20"
+        <div className="flex items-center gap-3 rounded-2xl px-4 sm:px-5 py-4 border border-amber-500/20"
           style={{ background: 'rgba(245,158,11,0.10)' }}>
           <FiUsers className="text-amber-400 shrink-0" size={18} />
           <p className="text-amber-300 font-bold text-sm">

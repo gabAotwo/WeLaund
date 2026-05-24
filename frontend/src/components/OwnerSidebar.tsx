@@ -2,7 +2,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiHome, FiUsers, FiSettings, FiPackage, FiLogOut } from 'react-icons/fi';
+import { FiHome, FiUsers, FiUserCheck, FiSettings, FiPackage, FiCreditCard, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 import MobileSidebarWrapper from './MobileSidebarWrapper';
 import ThemeToggle from './ThemeToggle';
@@ -11,7 +11,9 @@ import ThemeToggle from './ThemeToggle';
 const menuItems = [
   { name: 'Dashboard', path: '/owner/dashboard',  icon: FiHome },
   { name: 'Staff',     path: '/owner/staff',       icon: FiUsers },
+  { name: 'Customers', path: '/owner/customers',   icon: FiUserCheck },
   { name: 'Services',  path: '/owner/services',    icon: FiPackage },
+  { name: 'Billing',   path: '/owner/subscription', icon: FiCreditCard },
   { name: 'Settings',  path: '/owner/settings',    icon: FiSettings },
 ];
 

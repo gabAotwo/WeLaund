@@ -6,6 +6,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../config/Subscriptions.php';
 
 class SuperAdminController
 {
@@ -434,6 +435,7 @@ class SuperAdminController
 
     public function getPlatformStats(): array
     {
+        $billing = Subscriptions::getSuperAdminBilling();
         return [
             'total_shops'     => (int) $this->db->query('SELECT COUNT(*) FROM laundry_shops')->fetchColumn(),
             'active_shops'    => (int) $this->db->query("SELECT COUNT(*) FROM laundry_shops WHERE status='active'")->fetchColumn(),
@@ -443,6 +445,11 @@ class SuperAdminController
             'pending_customers' => (int) $this->db->query("SELECT COUNT(*) FROM customers WHERE status='Pending'")->fetchColumn(),
             'total_orders'    => (int) $this->db->query('SELECT COUNT(*) FROM orders')->fetchColumn(),
             'total_revenue'   => (float) $this->db->query('SELECT COALESCE(SUM(amount_paid),0) FROM payments')->fetchColumn(),
+            'subscription_revenue' => (float)($billing['summary']['approved_total'] ?? 0),
+            'subscription_pending' => (float)($billing['summary']['pending_total'] ?? 0),
+            'subscription_pending_count' => (int)($billing['summary']['pending_count'] ?? 0),
+            'subscription_overdue_shops' => (int)($billing['summary']['overdue_shops'] ?? 0),
+            'subscription_monthly' => $billing['monthly'] ?? [],
             'overdue_orders'  => (int) $this->db->query("SELECT COUNT(*) FROM orders WHERE order_status NOT IN ('Done','Cancelled') AND created_on < NOW() - INTERVAL '3 days'")->fetchColumn(),
         ];
     }

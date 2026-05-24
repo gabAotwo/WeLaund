@@ -102,6 +102,57 @@ class OwnerController
         return $stmt->fetch();
     }
 
+    public function getCustomers(string $status = 'all'): array
+    {
+        $allowed = ['Pending', 'Approved', 'Disapproved', 'Inactive'];
+        $where = 'WHERE shop_id = :shop_id';
+        $params = [':shop_id' => $this->shopId];
+
+        if ($status !== 'all' && in_array($status, $allowed, true)) {
+            $where .= ' AND status = :status';
+            $params[':status'] = $status;
+        }
+
+        $stmt = $this->db->prepare(
+            "SELECT id, first_name, middle_name, last_name, email, contact_number, address, status, created_on, last_updated, profile_photo
+             FROM customers
+             {$where}
+             ORDER BY
+               CASE status
+                 WHEN 'Pending' THEN 1
+                 WHEN 'Approved' THEN 2
+                 WHEN 'Inactive' THEN 3
+                 ELSE 4
+               END,
+               last_updated DESC NULLS LAST,
+               created_on DESC"
+        );
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            $row['photo_url'] = $row['profile_photo']
+                ? '/api/avatar.php?file=' . urlencode($row['profile_photo'])
+                : null;
+        }
+        return $rows;
+    }
+
+    public function updateCustomerStatus(string $customerId, string $status): bool
+    {
+        $allowed = ['Pending', 'Approved', 'Disapproved', 'Inactive'];
+        if (!in_array($status, $allowed, true)) return false;
+
+        $stmt = $this->db->prepare(
+            'UPDATE customers SET status = :status, last_updated = NOW()
+             WHERE id = :id AND shop_id = :shop_id'
+        );
+        return $stmt->execute([
+            ':status' => $status,
+            ':id' => $customerId,
+            ':shop_id' => $this->shopId,
+        ]);
+    }
+
     // ─────────────────────────────────────────────────────────
     //  SERVICES MANAGEMENT
     // ─────────────────────────────────────────────────────────

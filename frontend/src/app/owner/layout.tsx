@@ -2,12 +2,14 @@
 import OwnerSidebar from '@/components/OwnerSidebar';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import Messenger from '@/components/Messenger';
-import { FiHome, FiUsers, FiPackage, FiSettings } from 'react-icons/fi';
+import { FiHome, FiUsers, FiUserCheck, FiPackage, FiCreditCard, FiSettings } from 'react-icons/fi';
 
 const mobileItems = [
   { label: 'Home',     path: '/owner/dashboard', icon: <FiHome /> },
   { label: 'Staff',    path: '/owner/staff',      icon: <FiUsers /> },
+  { label: 'Customers', path: '/owner/customers',  icon: <FiUserCheck /> },
   { label: 'Services', path: '/owner/services',   icon: <FiPackage /> },
+  { label: 'Billing',  path: '/owner/subscription', icon: <FiCreditCard /> },
   { label: 'Settings', path: '/owner/settings',   icon: <FiSettings /> },
 ];
 

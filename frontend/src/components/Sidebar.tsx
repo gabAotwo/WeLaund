@@ -2,7 +2,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiHome, FiShoppingBag, FiUsers, FiUserCheck, FiBriefcase, FiLogOut, FiShield, FiDatabase, FiSettings, FiFileText } from 'react-icons/fi';
+import { FiHome, FiShoppingBag, FiUsers, FiUserCheck, FiBriefcase, FiLogOut, FiShield, FiDatabase, FiSettings, FiFileText, FiCreditCard } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 import MobileSidebarWrapper from './MobileSidebarWrapper';
 import ThemeToggle from './ThemeToggle';
@@ -13,6 +13,7 @@ const menuItems = [
   { name: 'Applications', path: '/super-admin/applications', icon: FiFileText },
   { name: 'Shops',        path: '/super-admin/shops',        icon: FiShoppingBag },
   { name: 'Owners',    path: '/super-admin/owners',    icon: FiUsers },
+  { name: 'Subscriptions', path: '/super-admin/subscriptions', icon: FiCreditCard },
   { name: 'Staff',     path: '/super-admin/staff',     icon: FiBriefcase },
   { name: 'Customers', path: '/super-admin/customers', icon: FiUserCheck },
   { name: 'Admins',    path: '/super-admin/admins',    icon: FiShield },

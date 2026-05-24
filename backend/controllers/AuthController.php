@@ -6,6 +6,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../config/Subscriptions.php';
 
 class AuthController
 {
@@ -60,6 +61,7 @@ class AuthController
 
     private function loginOwner(string $email, string $password): bool|string
     {
+        Subscriptions::enforceOverdue();
         $stmt = $this->db->prepare(
             'SELECT o.id, o.first_name, o.last_name, o.password_hash, o.status, o.shop_id, s.shop_name
              FROM owners o
@@ -88,6 +90,7 @@ class AuthController
 
     private function loginStaff(string $email, string $password): bool|string
     {
+        Subscriptions::enforceOverdue();
         $stmt = $this->db->prepare(
             'SELECT st.id, st.first_name, st.last_name, st.password_hash, st.status, st.shop_id, s.shop_name,
                     o.status AS owner_status
@@ -111,6 +114,7 @@ class AuthController
 
     private function loginCustomer(string $email, string $password): bool|string
     {
+        Subscriptions::enforceOverdue();
         $stmt = $this->db->prepare(
             'SELECT c.id, c.first_name, c.last_name, c.password_hash, c.status, c.shop_id, s.shop_name,
                     o.status AS owner_status

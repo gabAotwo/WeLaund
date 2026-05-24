@@ -96,6 +96,27 @@ export default function OwnerDashboard() {
   const daysInMonth = new Date(calYear, calMonth, 0).getDate();
   const maxIncome  = Math.max(...Object.values(calData), 1);
   const calMonthTotal = Object.values(calData).reduce((a, b) => a + b, 0);
+  const selectedYear = now.getFullYear();
+  const monthColors = ['#00aeef', '#6366f1', '#8e66ff', '#ec4899', '#f43f5e', '#f59e0b', '#22c55e', '#10b981', '#14b8a6', '#38bdf8', '#a78bfa', '#f97316'];
+  const monthlySeries = MONTHS.map((name, index) => {
+    const match = data?.monthly?.find((m: any) => Number(m.month) === index + 1 && Number(m.year) === selectedYear);
+    return {
+      month: name,
+      short: name.slice(0, 3),
+      total: parseFloat(match?.total || 0),
+      color: monthColors[index],
+    };
+  });
+  const monthlyYearTotal = monthlySeries.reduce((sum, m) => sum + m.total, 0);
+  let segmentStart = 0;
+  const monthlyGradient = monthlyYearTotal > 0
+    ? monthlySeries.map(m => {
+        const share = (m.total / monthlyYearTotal) * 100;
+        const segment = `${m.color} ${segmentStart}% ${segmentStart + share}%`;
+        segmentStart += share;
+        return segment;
+      }).join(', ')
+    : 'rgba(255,255,255,0.12) 0% 100%';
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
@@ -257,8 +278,54 @@ export default function OwnerDashboard() {
         {/* Right: Bar chart + Quick links */}
         <div className="space-y-5">
 
-          {/* Monthly bar chart */}
+          {/* Monthly overview */}
           <div className="p-5" style={CARD}>
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <h3 className="font-black text-white text-sm">Monthly Overview</h3>
+                <p className="text-[10px] text-white/30 mt-0.5">All months in {selectedYear}</p>
+              </div>
+              <span className="text-[10px] font-black px-2 py-1 rounded-full text-cyan-200"
+                style={{ background: 'rgba(0,174,239,0.14)' }}>
+                {monthlySeries.filter(m => m.total > 0).length}/12 active
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative w-40 h-40 rounded-full shrink-0"
+                style={{ background: `conic-gradient(${monthlyGradient})` }}>
+                <div className="absolute inset-5 rounded-full flex flex-col items-center justify-center text-center"
+                  style={{ background: 'rgba(10,20,50,0.96)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <span className="text-[10px] font-bold text-white/35 uppercase">Year Total</span>
+                  <span className="text-lg font-black text-white leading-tight">
+                    â‚±{monthlyYearTotal.toLocaleString('en-PH', { maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-3 gap-y-2 w-full">
+                {monthlySeries.map(m => (
+                  <div key={m.month} className="min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: m.color }} />
+                        <span className="text-[10px] font-black text-white/55 uppercase truncate">{m.short}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-white/40 shrink-0">
+                        â‚±{m.total >= 1000 ? `${(m.total / 1000).toFixed(1)}k` : m.total.toFixed(0)}
+                      </span>
+                    </div>
+                    <div className="mt-1 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="h-full rounded-full" style={{ width: `${monthlyYearTotal ? Math.max((m.total / monthlyYearTotal) * 100, m.total > 0 ? 3 : 0) : 0}%`, background: m.color }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Legacy monthly bars retained for reference but hidden */}
+          <div className="hidden" style={CARD}>
             <h3 className="font-black text-white text-sm mb-4">Monthly Overview</h3>
             <div className="h-36 flex items-end gap-1 overflow-x-auto pb-2">
               {data?.monthly?.length ? (
@@ -295,7 +362,9 @@ export default function OwnerDashboard() {
             <div className="space-y-2">
               {[
                 { label: 'Manage Staff',    href: '/owner/staff' },
+                { label: 'View Customers',  href: '/owner/customers' },
                 { label: 'Manage Services', href: '/owner/services' },
+                { label: 'Pay Subscription', href: '/owner/subscription' },
                 { label: 'Shop Settings',   href: '/owner/settings' },
               ].map(({ label, href }) => (
                 <Link key={href} href={href}>

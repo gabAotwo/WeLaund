@@ -6,6 +6,7 @@ Cors::handle(['GET', 'OPTIONS']);
 
 require_once __DIR__ . '/../../config/Session.php';
 require_once __DIR__ . '/../../config/Database.php';
+require_once __DIR__ . '/../../config/Subscriptions.php';
 start_session();
 
 if (!empty($_SESSION['logged_in'])) {
@@ -15,6 +16,7 @@ if (!empty($_SESSION['logged_in'])) {
 
     try {
         $db = Database::getConnection();
+        Subscriptions::enforceOverdue();
 
         // Live status check per role
         if ($role === 'owner') {

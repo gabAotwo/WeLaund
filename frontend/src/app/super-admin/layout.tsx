@@ -3,12 +3,13 @@ import Sidebar from '@/components/Sidebar';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import SuperAdminNotifications from '@/components/SuperAdminNotifications';
 import Messenger from '@/components/Messenger';
-import { FiHome, FiShoppingBag, FiUsers, FiShield } from 'react-icons/fi';
+import { FiHome, FiShoppingBag, FiUsers, FiCreditCard, FiShield } from 'react-icons/fi';
 
 const mobileItems = [
   { label: 'Home',      path: '/super-admin/dashboard', icon: <FiHome /> },
   { label: 'Shops',     path: '/super-admin/shops',     icon: <FiShoppingBag /> },
   { label: 'Owners',    path: '/super-admin/owners',    icon: <FiUsers /> },
+  { label: 'Billing',   path: '/super-admin/subscriptions', icon: <FiCreditCard /> },
   { label: 'Admins',    path: '/super-admin/admins',    icon: <FiShield /> },
 ];
 
