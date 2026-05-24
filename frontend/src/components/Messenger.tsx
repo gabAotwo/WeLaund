@@ -280,8 +280,8 @@ export default function Messenger() {
 
   const handleSendMessage = async (e?: React.FormEvent, imageUrl: string | null = null) => {
     if (e) e.preventDefault();
-    if (!inputText.trim() && !imageUrl) return;
-    if (!activeRoom) return;
+    if (!inputText.trim() && !imageUrl) return false;
+    if (!activeRoom) return false;
 
     setIsSending(true);
     const textToSend = inputText;
@@ -301,11 +301,16 @@ export default function Messenger() {
       if (res.success) {
         setMessages(prev => [...prev, res.message]);
         fetchRooms();
+        return true;
       } else {
         toast.error(res.message || 'Failed to send message');
+        if (!imageUrl) setInputText(textToSend);
+        return false;
       }
     } catch (e: any) {
       toast.error(e.message || 'Connection error');
+      if (!imageUrl) setInputText(textToSend);
+      return false;
     } finally {
       setIsSending(false);
     }
@@ -314,10 +319,15 @@ export default function Messenger() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    if (!activeRoom) {
+      toast.error('Open a chat before sending an image.');
+      return;
+    }
     
     const file = files[0];
     if (file.size > 5 * 1024 * 1024) {
       toast.error('File exceeds the 5MB size limit.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
@@ -332,8 +342,8 @@ export default function Messenger() {
       });
       const data = await res.json();
       if (data.success && data.image_url) {
-        handleSendMessage(undefined, data.image_url);
-        toast.success('Image sent successfully');
+        const sent = await handleSendMessage(undefined, data.image_url);
+        if (sent) toast.success('Image sent successfully');
       } else {
         toast.error(data.message || 'Upload failed');
       }

@@ -49,6 +49,16 @@ $cloudName = Env::get('CLOUDINARY_CLOUD_NAME');
 $apiKey    = Env::get('CLOUDINARY_API_KEY');
 $apiSecret = Env::get('CLOUDINARY_API_SECRET');
 
+if (!$cloudName || !$apiKey || !$apiSecret) {
+    error_log('[upload_avatar] Missing Cloudinary configuration.');
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET on the backend server.',
+    ]);
+    exit;
+}
+
 // ── Build signed upload params ──
 $timestamp  = time();
 $publicId   = 'avatars/' . $role . '_' . $userId;
@@ -83,13 +93,19 @@ curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curlError = curl_error($ch);
 curl_close($ch);
 
 $result = json_decode($response, true);
 
 if ($httpCode !== 200 || empty($result['secure_url'])) {
+    $cloudinaryMessage = is_array($result) ? ($result['error']['message'] ?? '') : '';
+    $detail = $cloudinaryMessage ?: ($curlError ?: 'Unknown Cloudinary error');
     error_log('[upload_avatar] Cloudinary error: ' . $response);
-    echo json_encode(['success' => false, 'message' => 'Cloudinary upload failed.']);
+    if ($curlError) {
+        error_log('[upload_avatar] cURL error: ' . $curlError);
+    }
+    echo json_encode(['success' => false, 'message' => 'Cloudinary upload failed: ' . $detail]);
     exit;
 }
 

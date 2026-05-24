@@ -70,7 +70,10 @@ export default function StaffSettingsPage() {
       fd.append('avatar', compressed, 'avatar.jpg');
       const res  = await fetch('/api/upload_avatar.php', { method: 'POST', body: fd });
       const data = await res.json();
-      if (data.success) setPhotoUrl(data.photo_url + '&t=' + Date.now());
+      if (data.success) {
+        const separator = data.photo_url.includes('?') ? '&' : '?';
+        setPhotoUrl(data.photo_url + separator + 't=' + Date.now());
+      }
       else alert(data.message || 'Upload failed');
     } catch { alert('Upload error'); }
     finally { setUploading(false); }
