@@ -53,9 +53,9 @@ if (!in_array($mime, $allowed, true)) {
 
 // ── Cloudinary credentials ──
 Env::load();
-$cloudName = Env::get('CLOUDINARY_CLOUD_NAME');
-$apiKey    = Env::get('CLOUDINARY_API_KEY');
-$apiSecret = Env::get('CLOUDINARY_API_SECRET');
+$cloudName = trim(Env::get('CLOUDINARY_CLOUD_NAME'), " \t\n\r\0\x0B\"'");
+$apiKey    = trim(Env::get('CLOUDINARY_API_KEY'), " \t\n\r\0\x0B\"'");
+$apiSecret = trim(Env::get('CLOUDINARY_API_SECRET'), " \t\n\r\0\x0B\"'");
 
 if (!$cloudName || !$apiKey || !$apiSecret) {
     error_log('[upload_chat_image] Missing Cloudinary configuration.');
