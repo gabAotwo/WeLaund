@@ -35,6 +35,18 @@ class Subscriptions
                 admin_note TEXT
             )
         ");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS shop_id UUID REFERENCES laundry_shops(id) ON DELETE CASCADE");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS owner_id UUID REFERENCES owners(id) ON DELETE CASCADE");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS amount NUMERIC(10,2) NOT NULL DEFAULT 0");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS billing_month DATE NOT NULL DEFAULT DATE_TRUNC('month', CURRENT_DATE)::DATE");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) NOT NULL DEFAULT 'Manual'");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS reference_number VARCHAR(120) NOT NULL DEFAULT ''");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS proof_url TEXT");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'Pending'");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMP NOT NULL DEFAULT NOW()");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMP NULL");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS reviewed_by UUID NULL REFERENCES super_admins(id)");
+        $db->exec("ALTER TABLE owner_subscription_payments ADD COLUMN IF NOT EXISTS admin_note TEXT");
         $db->exec("CREATE INDEX IF NOT EXISTS idx_owner_subscription_payments_status ON owner_subscription_payments(status)");
         $db->exec("CREATE INDEX IF NOT EXISTS idx_owner_subscription_payments_shop_month ON owner_subscription_payments(shop_id, billing_month)");
     }
