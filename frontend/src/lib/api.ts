@@ -18,5 +18,8 @@ export async function readJson<T = any>(response: Response): Promise<T> {
 }
 
 export async function fetchJson<T = any>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
-  return readJson<T>(await fetch(input, init));
+  return readJson<T>(await fetch(input, {
+    credentials: 'include',
+    ...init,
+  }));
 }
