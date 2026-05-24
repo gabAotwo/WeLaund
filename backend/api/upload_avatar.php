@@ -101,6 +101,7 @@ $result = json_decode($response, true);
 if ($httpCode !== 200 || empty($result['secure_url'])) {
     $cloudinaryMessage = is_array($result) ? ($result['error']['message'] ?? '') : '';
     $detail = $cloudinaryMessage ?: ($curlError ?: 'Unknown Cloudinary error');
+    $detail = preg_replace('/api_key\s+\S+/i', 'api_key [redacted]', $detail);
     error_log('[upload_avatar] Cloudinary error: ' . $response);
     if ($curlError) {
         error_log('[upload_avatar] cURL error: ' . $curlError);

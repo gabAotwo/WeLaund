@@ -129,7 +129,16 @@ export default function Messenger() {
 
   const fetchUnreadTotal = async () => {
     try {
-      const res = await fetchJson('/api/chat/unread_count.php');
+      const response = await fetch('/api/chat/unread_count.php', {
+        credentials: 'include',
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        setUnreadTotal(0);
+        return;
+      }
+
+      const res = await response.json();
       if (res.success) {
         setUnreadTotal(res.unread_count);
       }
@@ -140,7 +149,9 @@ export default function Messenger() {
 
   const fetchRooms = async () => {
     try {
-      const res = await fetchJson('/api/chat/rooms.php');
+      const res = await fetchJson('/api/chat/rooms.php', {
+        credentials: 'include',
+      });
       if (res.success) {
         setRooms(res.rooms || []);
       }
@@ -151,7 +162,9 @@ export default function Messenger() {
 
   const fetchContacts = async () => {
     try {
-      const res = await fetchJson('/api/chat/participants.php');
+      const res = await fetchJson('/api/chat/participants.php', {
+        credentials: 'include',
+      });
       if (res.success) {
         setContacts(res.contacts || []);
       }
@@ -162,7 +175,9 @@ export default function Messenger() {
 
   const fetchConnections = async () => {
     try {
-      const res = await fetchJson('/api/chat/connections.php');
+      const res = await fetchJson('/api/chat/connections.php', {
+        credentials: 'include',
+      });
       if (res.success) {
         setAcceptedFriends(res.accepted || []);
         setPendingSent(res.pending_sent || []);
@@ -175,7 +190,9 @@ export default function Messenger() {
 
   const fetchBlockedUsers = async () => {
     try {
-      const res = await fetchJson('/api/chat/blocks.php');
+      const res = await fetchJson('/api/chat/blocks.php', {
+        credentials: 'include',
+      });
       if (res.success) {
         setBlockedUsers(res.blocked || []);
       }
@@ -186,7 +203,9 @@ export default function Messenger() {
 
   const fetchMessages = async (roomId: string) => {
     try {
-      const res = await fetchJson(`/api/chat/messages.php?room_id=${roomId}`);
+      const res = await fetchJson(`/api/chat/messages.php?room_id=${roomId}`, {
+        credentials: 'include',
+      });
       if (res.success) {
         setMessages(res.messages || []);
       }
@@ -200,6 +219,7 @@ export default function Messenger() {
     try {
       const res = await fetchJson('/api/chat/rooms.php', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target_id: contactId })
       });
@@ -238,6 +258,7 @@ export default function Messenger() {
     try {
       const res = await fetchJson('/api/chat/connections.php', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target_id: targetId, action })
       });
@@ -258,6 +279,7 @@ export default function Messenger() {
     try {
       const res = await fetchJson('/api/chat/blocks.php', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target_id: targetId, action })
       });
@@ -290,6 +312,7 @@ export default function Messenger() {
     try {
       const res = await fetchJson('/api/chat/messages.php', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           room_id: activeRoom.room_id,
@@ -338,6 +361,7 @@ export default function Messenger() {
     try {
       const res = await fetch('/api/chat/upload_chat_image.php', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       });
       const data = await res.json();
