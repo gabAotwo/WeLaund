@@ -158,15 +158,16 @@ class Subscriptions
             UPDATE laundry_shops
             SET subscription_monthly_fee = :monthly_fee,
                 subscription_due_date = COALESCE(CAST(:due_date AS DATE), subscription_due_date),
-                subscription_status = :subscription_status,
-                status = CASE WHEN :subscription_status = 'overdue' THEN 'inactive' ELSE 'active' END,
-                subscription_note = NULLIF(:note, '')
+                subscription_status = CAST(:subscription_status AS VARCHAR),
+                status = CASE WHEN CAST(:status_for_shop AS VARCHAR) = 'overdue' THEN 'inactive' ELSE 'active' END,
+                subscription_note = NULLIF(CAST(:note AS TEXT), '')
             WHERE id = :shop_id
         ");
         $ok = $stmt->execute([
             ':monthly_fee' => $monthlyFee,
             ':due_date' => $dueDate,
             ':subscription_status' => $subscriptionStatus,
+            ':status_for_shop' => $subscriptionStatus,
             ':note' => $note,
             ':shop_id' => $shopId,
         ]);
@@ -174,7 +175,7 @@ class Subscriptions
         if ($ok) {
             $ownerStmt = $db->prepare("
                 UPDATE owners o
-                SET status = CASE WHEN :subscription_status = 'overdue' THEN 'inactive' ELSE 'active' END
+                SET status = CASE WHEN CAST(:subscription_status AS VARCHAR) = 'overdue' THEN 'inactive' ELSE 'active' END
                 WHERE EXISTS (SELECT 1 FROM laundry_shops s WHERE s.id = :shop_id AND s.owner_id = o.id)
             ");
             $ownerStmt->execute([':subscription_status' => $subscriptionStatus, ':shop_id' => $shopId]);
